@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wind Tunnel — Lattice Boltzmann Fluid Dynamics</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Wind Tunnel <span class="subtitle">Lattice Boltzmann Fluid Dynamics</span></h1>
+  </header>
+
+  <main>
+    <aside id="controls-panel" class="panel left-panel">
+      <div class="panel-header" data-toggle="controls-body">
+        <h2>Controls</h2>
+        <span class="collapse-icon">&#x25BC;</span>
+      </div>
+      <div id="controls-body" class="panel-body">
+        <div class="control-group">
+          <label for="reynolds-slider">Reynolds Number: <span id="reynolds-value">180</span></label>
+          <input type="range" id="reynolds-slider" min="20" max="1500" value="180" step="10">
+          <div class="range-labels"><span>20 (laminar)</span><span>1500 (turbulent)</span></div>
+        </div>
+
+        <div class="control-group">
+          <label>Obstacle Presets</label>
+          <div class="preset-grid">
+            <button class="preset-btn active" data-preset="cylinder" title="Classic von Karman demo">Cylinder</button>
+            <button class="preset-btn" data-preset="airfoil" title="Lift generation">Airfoil</button>
+            <button class="preset-btn" data-preset="bridge" title="Tacoma Narrows reference">Bridge Pylon</button>
+            <button class="preset-btn" data-preset="plate" title="Drag demonstration">Flat Plate</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label>Visualization</label>
+          <div class="viz-grid">
+            <button class="viz-btn" data-viz="velocity">Velocity</button>
+            <button class="viz-btn active" data-viz="vorticity">Vorticity</button>
+            <button class="viz-btn" data-viz="streamlines">Streamlines</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label>Draw Mode</label>
+          <div class="viz-grid">
+            <button class="draw-btn active" data-draw="draw">Draw</button>
+            <button class="draw-btn" data-draw="erase">Erase</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label for="speed-slider">Simulation Speed: <span id="speed-value">20</span> steps/frame</label>
+          <input type="range" id="speed-slider" min="1" max="40" value="20">
+        </div>
+
+        <div class="control-group">
+          <label for="resolution-slider">Grid: <span id="resolution-value">400</span> x <span id="resolution-height">200</span></label>
+          <input type="range" id="resolution-slider" min="200" max="800" value="400" step="50">
+        </div>
+
+        <div class="control-group buttons-row">
+          <button id="pause-btn" class="action-btn">Pause</button>
+          <button id="reset-btn" class="action-btn">Reset</button>
+          <button id="screenshot-btn" class="action-btn">Screenshot</button>
+        </div>
+      </div>
+    </aside>
+
+    <section id="canvas-container">
+      <canvas id="sim-canvas"></canvas>
+      <div id="colorbar">
+        <canvas id="colorbar-canvas" width="256" height="16"></canvas>
+        <div class="colorbar-labels">
+          <span id="colorbar-min">0</span>
+          <span id="colorbar-label">Vorticity</span>
+          <span id="colorbar-max">1</span>
+        </div>
+      </div>
+    </section>
+
+    <aside id="education-panel" class="panel right-panel">
+      <div class="panel-header" data-toggle="education-body">
+        <h2>What You're Seeing</h2>
+        <span class="collapse-icon">&#x25BC;</span>
+      </div>
+      <div id="education-body" class="panel-body">
+        <div id="edu-regime" class="edu-section">
+          <h3 id="regime-title">Vortex Street</h3>
+          <p id="regime-text">Loading...</p>
+        </div>
+        <div id="edu-obstacle" class="edu-section">
+          <h3>About This Obstacle</h3>
+          <p id="obstacle-text">Loading...</p>
+        </div>
+        <div id="edu-physics" class="edu-section">
+          <h3>The Physics</h3>
+          <p id="physics-text">
+            This simulation uses the <strong>Lattice Boltzmann Method</strong> (LBM) — instead of solving the Navier-Stokes equations directly, it models the fluid as particles streaming and colliding on a lattice grid.
+          </p>
+          <p>
+            Each cell tracks 9 distribution functions (D2Q9) representing the probability of finding a particle moving in each direction. At every step:
+          </p>
+          <ol>
+            <li><strong>Stream</strong> — distributions shift to neighboring cells</li>
+            <li><strong>Collide</strong> — distributions relax toward equilibrium (BGK operator)</li>
+            <li><strong>Bounce-back</strong> — distributions reflect off solid boundaries</li>
+          </ol>
+          <p>
+            The <strong>Reynolds number</strong> Re = UL/&nu; controls the flow regime. Low Re means viscosity dominates (laminar). High Re means inertia dominates (turbulent).
+          </p>
+        </div>
+        <div id="edu-viz" class="edu-section">
+          <h3>Visualization Mode</h3>
+          <p id="viz-text">Loading...</p>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <footer>
+    <p>Lattice Boltzmann Method &middot; D2Q9 &middot; BGK Collision &middot; Equilibrium Inlet &middot; Bounce-Back Boundaries</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
