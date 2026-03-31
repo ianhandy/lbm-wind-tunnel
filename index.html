@@ -20,8 +20,8 @@
       <div id="controls-body" class="panel-body">
         <div class="control-group">
           <label for="reynolds-slider">Reynolds Number: <span id="reynolds-value">180</span></label>
-          <input type="range" id="reynolds-slider" min="20" max="1500" value="180" step="10">
-          <div class="range-labels"><span>20 (laminar)</span><span>1500 (turbulent)</span></div>
+          <input type="range" id="reynolds-slider" min="20" max="800" value="180" step="10">
+          <div class="range-labels"><span>20 (laminar)</span><span>800 (turbulent)</span></div>
         </div>
 
         <div class="control-group">
@@ -44,9 +44,10 @@
         </div>
 
         <div class="control-group">
-          <label>Draw Mode</label>
+          <label>Interaction</label>
           <div class="viz-grid">
-            <button class="draw-btn active" data-draw="draw">Draw</button>
+            <button class="draw-btn active" data-draw="move">Move</button>
+            <button class="draw-btn" data-draw="draw">Draw</button>
             <button class="draw-btn" data-draw="erase">Erase</button>
           </div>
         </div>
@@ -71,6 +72,7 @@
 
     <section id="canvas-container">
       <canvas id="sim-canvas"></canvas>
+      <div id="drag-tooltip">Drag to move obstacle</div>
       <div id="colorbar">
         <canvas id="colorbar-canvas" width="256" height="16"></canvas>
         <div class="colorbar-labels">
@@ -91,37 +93,50 @@
           <h3 id="regime-title">Vortex Street</h3>
           <p id="regime-text">Loading...</p>
         </div>
+
         <div id="edu-obstacle" class="edu-section">
           <h3>About This Obstacle</h3>
           <p id="obstacle-text">Loading...</p>
         </div>
-        <div id="edu-physics" class="edu-section">
-          <h3>The Physics</h3>
-          <p id="physics-text">
-            This simulation uses the <strong>Lattice Boltzmann Method</strong> (LBM) — instead of solving the Navier-Stokes equations directly, it models the fluid as particles streaming and colliding on a lattice grid.
-          </p>
-          <p>
-            Each cell tracks 9 distribution functions (D2Q9) representing the probability of finding a particle moving in each direction. At every step:
-          </p>
-          <ol>
-            <li><strong>Stream</strong> — distributions shift to neighboring cells</li>
-            <li><strong>Collide</strong> — distributions relax toward equilibrium (BGK operator)</li>
-            <li><strong>Bounce-back</strong> — distributions reflect off solid boundaries</li>
-          </ol>
-          <p>
-            The <strong>Reynolds number</strong> Re = UL/&nu; controls the flow regime. Low Re means viscosity dominates (laminar). High Re means inertia dominates (turbulent).
-          </p>
-        </div>
+
         <div id="edu-viz" class="edu-section">
           <h3>Visualization Mode</h3>
           <p id="viz-text">Loading...</p>
+        </div>
+
+        <div id="edu-physics" class="edu-section">
+          <h3>How It Works</h3>
+          <p>
+            The <strong>Reynolds number</strong> Re = UL/&nu; controls whether flow is smooth or chaotic. Low Re: viscosity dominates (laminar). High Re: inertia dominates (turbulent).
+          </p>
+          <p>
+            Under the hood, this uses the <strong>Lattice Boltzmann Method</strong> — instead of solving fluid equations directly, it simulates particles streaming and colliding on a grid. Each cell tracks 9 velocity directions. At every step: <strong>stream</strong> (shift to neighbors), <strong>collide</strong> (relax toward equilibrium), <strong>bounce-back</strong> (reflect off walls).
+          </p>
+        </div>
+
+        <div class="edu-section edu-references">
+          <h3>References</h3>
+          <ul>
+            <li>Von Kármán, "Über den Mechanismus des Widerstandes" (1911) — vortex street theory</li>
+            <li>Bhatnagar, Gross &amp; Krook (1954) — BGK collision operator</li>
+            <li>McNamara &amp; Zanetti (1988) — Lattice Boltzmann Method</li>
+            <li>Qian et al. (1992) — D2Q9 lattice model</li>
+            <li>Roshko, NACA Report 1191 (1954) — Strouhal number for vortex shedding</li>
+            <li>Kolmogorov (1941) — turbulent energy cascade</li>
+          </ul>
+          <p><strong>Further reading:</strong></p>
+          <ul>
+            <li>Succi, <em>The Lattice Boltzmann Equation</em> (Oxford, 2001)</li>
+            <li>Strogatz, <em>Nonlinear Dynamics and Chaos</em> (2015) Ch. 10</li>
+            <li>Schroeder, <a href="https://physics.weber.edu/schroeder/fluids/" target="_blank">physics.weber.edu/schroeder/fluids</a></li>
+          </ul>
         </div>
       </div>
     </aside>
   </main>
 
   <footer>
-    <p>Lattice Boltzmann Method &middot; D2Q9 &middot; BGK Collision &middot; Equilibrium Inlet &middot; Bounce-Back Boundaries</p>
+    <p>ianhandy.com</p>
   </footer>
 
   <script src="app.js"></script>

@@ -228,11 +228,28 @@ input[type="range"]::-webkit-slider-thumb {
 
 #sim-canvas {
   display: block;
-  max-width: 100%;
-  max-height: calc(100% - 40px);
+  width: 100%;
+  height: calc(100% - 40px);
   border-radius: 4px;
   cursor: crosshair;
   image-rendering: pixelated;
+  object-fit: contain;
+}
+
+#drag-tooltip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(22, 27, 34, 0.9);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  z-index: 10;
 }
 
 #colorbar {
@@ -354,11 +371,13 @@ footer p {
   }
 
   /* Start panels collapsed on mobile */
-  .panel-body.mobile-collapse {
+  .panel-body.mobile-collapse,
+  .panel-body.collapsed {
     display: none;
   }
 
-  .panel-header.mobile-collapse .collapse-icon {
+  .panel-header.mobile-collapse .collapse-icon,
+  .panel-header.collapsed .collapse-icon {
     transform: rotate(-90deg);
   }
 }

@@ -24,7 +24,7 @@
   let stepsPerFrame = 20;
   let paused = false;
   let vizMode = 'vorticity';
-  let drawMode = 'draw';
+  let drawMode = 'move';
   let currentPreset = 'cylinder';
   let stepCount = 0;
 
@@ -180,9 +180,20 @@
         const i = y*xs + x;
         if (bar[i]) continue;
 
-        const r = n0[i]+nE[i]+nW[i]+nN[i]+nS[i]+nNE[i]+nNW[i]+nSE[i]+nSW[i];
-        const vx = (nE[i]+nNE[i]+nSE[i] - nW[i]-nNW[i]-nSW[i]) / r;
-        const vy = (nS[i]+nSE[i]+nSW[i] - nN[i]-nNE[i]-nNW[i]) / r;
+        let r = n0[i]+nE[i]+nW[i]+nN[i]+nS[i]+nNE[i]+nNW[i]+nSE[i]+nSW[i];
+        if (r < 0.01) r = 0.01;  // prevent division by near-zero density
+        let vx = (nE[i]+nNE[i]+nSE[i] - nW[i]-nNW[i]-nSW[i]) / r;
+        let vy = (nS[i]+nSE[i]+nSW[i] - nN[i]-nNE[i]-nNW[i]) / r;
+
+        // Clamp velocity to prevent numerical explosion
+        // LBM is stable when |v| << 1/sqrt(3) ≈ 0.577; clamp well below
+        const speed2 = vx*vx + vy*vy;
+        if (speed2 > 0.04) {  // |v| > 0.2
+          const scale = 0.2 / Math.sqrt(speed2);
+          vx *= scale;
+          vy *= scale;
+        }
+
         rh[i] = r; ux[i] = vx; uy[i] = vy;
 
         const ux3=3*vx, uy3=3*vy;
@@ -404,7 +415,7 @@
     trailCv.width = xdim; trailCv.height = ydim;
     trailCx.fillStyle = '#0d1117'; trailCx.fillRect(0,0,xdim,ydim);
   }
-  function spawnP() { return {x:Math.random()*xdim*0.05, y:Math.random()*ydim, age:Math.random()*200|0, max:200+(Math.random()*150|0)}; }
+  function spawnP() { return {x:Math.random()*xdim*0.02, y:Math.random()*ydim, age:Math.random()*100|0, max:600+(Math.random()*400|0)}; }
 
   function renderStreamlines(mxS) {
     for (let i = 0; i < parts.length; i++) {
@@ -413,7 +424,7 @@
       if (ix<0||ix>=xdim||iy<0||iy>=ydim||p.age>=p.max) { parts[i]=spawnP(); continue; }
       const idx=iy*xdim+ix;
       if (bar[idx]) { parts[i]=spawnP(); continue; }
-      p.x += ux[idx]*1.5; p.y += uy[idx]*1.5; p.age++;
+      p.x += ux[idx]*3.0; p.y += uy[idx]*3.0; p.age++;
     }
     trailCx.fillStyle = 'rgba(13,17,23,0.035)';
     trailCx.fillRect(0,0,xdim,ydim);
@@ -453,9 +464,9 @@
   /* ── Educational content ───────────────────────────────── */
   const regimeText = {
     laminar: { title:'Laminar Flow', text:`At Re\u00a0=\u00a0<strong id="re-inline">{RE}</strong>, viscous forces dominate. The fluid wraps smoothly around the obstacle with no separation \u2014 a perfectly steady, symmetric flow. This is how honey flows around a spoon, or how blood moves through your smallest capillaries.<br><br>In this regime, the flow is entirely predictable. If you could reverse time, the fluid would trace the exact same path backward. There is no chaos here.` },
-    vortexStreet: { title:'Von K\u00e1rm\u00e1n Vortex Street', text:`Re\u00a0=\u00a0<strong id="re-inline">{RE}</strong> \u2014 you\u2019re watching one of fluid dynamics\u2019 most beautiful phenomena. The flow separates behind the obstacle and forms alternating vortices that peel off in a staggered pattern \u2014 a <strong>von K\u00e1rm\u00e1n vortex street</strong>.<br><br>This is what makes power lines hum on windy days. It\u2019s what caused the <strong>Tacoma Narrows Bridge</strong> to oscillate wildly and collapse in 1940 \u2014 the vortex shedding frequency matched the bridge\u2019s natural frequency, creating resonance.<br><br>The shedding frequency follows the <strong>Strouhal number</strong> St\u00a0\u2248\u00a00.2, meaning the vortices peel off at a remarkably consistent rate.` },
+    vortexStreet: { title:'Von K\u00e1rm\u00e1n Vortex Street', text:`Re\u00a0=\u00a0<strong id="re-inline">{RE}</strong> \u2014 you\u2019re watching one of fluid dynamics\u2019 most beautiful phenomena. The flow separates behind the obstacle and forms alternating vortices that peel off in a staggered pattern \u2014 a <strong>von K\u00e1rm\u00e1n vortex street</strong>, first described mathematically by Theodore von K\u00e1rm\u00e1n in 1911 (\u201c\u00dcber den Mechanismus des Widerstandes\u201d, G\u00f6ttinger Nachrichten).<br><br>This is what makes power lines hum on windy days. It\u2019s what caused the <strong>Tacoma Narrows Bridge</strong> to oscillate wildly and collapse on November 7, 1940 \u2014 the vortex shedding frequency matched the bridge\u2019s natural frequency, creating resonance.<br><br>The shedding frequency follows the <strong>Strouhal number</strong> St\u00a0\u2248\u00a00.2 (Roshko, 1954, NACA Report 1191), meaning the vortices peel off at a remarkably consistent rate.` },
     turbulentWake: { title:'Turbulent Wake', text:`At Re\u00a0=\u00a0<strong id="re-inline">{RE}</strong>, the orderly vortex street is breaking apart. The wake behind the obstacle becomes increasingly chaotic \u2014 vortices merge, split, and interact unpredictably.<br><br>This transition from order to chaos is one of the <strong>deepest unsolved problems in physics</strong>. We can describe it statistically but can\u2019t predict it from first principles. Werner Heisenberg reportedly said: \u201cWhen I meet God, I am going to ask him two questions: Why relativity? And why turbulence? I really believe he will have an answer for the first.\u201d<br><br>Yet this \u201cmessy\u201d turbulence is everywhere \u2014 it mixes cream into your coffee, keeps airplanes aloft, and drives weather patterns across the planet.` },
-    turbulent: { title:'Fully Turbulent', text:`Re\u00a0=\u00a0<strong id="re-inline">{RE}</strong> \u2014 fully turbulent. The wake is chaotic across all scales. Small eddies cascade from large ones in what\u2019s called the <strong>Kolmogorov cascade</strong>.<br><br>Understanding turbulence is one of the <strong>Clay Millennium Prize problems</strong> \u2014 a million-dollar bounty for proving basic properties of the Navier-Stokes equations. After 200+ years of study, we still can\u2019t prove whether smooth solutions always exist.<br><br>Every time you look at a waterfall, a campfire, or clouds forming, you\u2019re watching a phenomenon we can simulate but fundamentally cannot solve analytically.` }
+    turbulent: { title:'Fully Turbulent', text:`Re\u00a0=\u00a0<strong id="re-inline">{RE}</strong> \u2014 fully turbulent. The wake is chaotic across all scales. Small eddies cascade from large ones in what Kolmogorov described in 1941 (\u201cThe Local Structure of Turbulence\u201d, Dokl. Akad. Nauk SSSR) \u2014 the <strong>Kolmogorov cascade</strong>.<br><br>Understanding turbulence is one of the <strong>Clay Millennium Prize problems</strong> (claymath.org, 2000) \u2014 a million-dollar bounty for proving basic properties of the Navier-Stokes equations. After 200+ years of study, we still can\u2019t prove whether smooth solutions always exist. See Fefferman (2006), \u201cExistence and Smoothness of the Navier-Stokes Equation\u201d for the formal problem statement.<br><br>Every time you look at a waterfall, a campfire, or clouds forming, you\u2019re watching a phenomenon we can simulate but fundamentally cannot solve analytically.` }
   };
   const obsText = {
     cylinder: `The <strong>cylinder</strong> is the classic demonstration shape for vortex shedding. Its perfect symmetry makes the instability especially vivid \u2014 the symmetric wake becomes unstable and spontaneously breaks into the alternating pattern. This is the geometry Theodore von K\u00e1rm\u00e1n studied when he discovered these vortex streets in 1911.`,
@@ -482,9 +493,14 @@
     document.getElementById('viz-text').innerHTML = vizText[vizMode]||'';
   }
 
-  /* ── Drawing ───────────────────────────────────────────── */
+  /* ── Interaction ────────────────────────────────────────── */
   let drawing = false;
+  let draggingObstacle = false;
+  let dragStartX = 0, dragStartY = 0;
+  let obsCenterX = 0, obsCenterY = 0;
+
   function gxy(cx,cy) { const r=canvas.getBoundingClientRect(); return {x:((cx-r.left)/r.width*xdim)|0, y:((cy-r.top)/r.height*ydim)|0}; }
+
   function paint(gx,gy) {
     const r=Math.max(2,(ydim/50)|0), val=drawMode==='draw'?1:0;
     for (let dy=-r;dy<=r;dy++) for (let dx=-r;dx<=r;dx++) {
@@ -493,10 +509,93 @@
       if (x>1&&x<xdim-2&&y>1&&y<ydim-2) { const i=y*xdim+x; bar[i]=val; if(!val) setEq(i,u0,0,1); }
     }
   }
-  canvas.addEventListener('pointerdown', e=>{drawing=true;const g=gxy(e.clientX,e.clientY);paint(g.x,g.y);e.preventDefault();});
-  canvas.addEventListener('pointermove', e=>{if(!drawing)return;const g=gxy(e.clientX,e.clientY);paint(g.x,g.y);e.preventDefault();});
-  canvas.addEventListener('pointerup', ()=>drawing=false);
-  canvas.addEventListener('pointerleave', ()=>drawing=false);
+
+  // Check if a grid point is near an obstacle
+  function nearObstacle(gx, gy, radius) {
+    for (let dy = -radius; dy <= radius; dy++) {
+      for (let dx = -radius; dx <= radius; dx++) {
+        const x = gx+dx, y = gy+dy;
+        if (x>=0 && x<xdim && y>=0 && y<ydim && bar[y*xdim+x]) return true;
+      }
+    }
+    return false;
+  }
+
+  // Find center of mass of all obstacle cells
+  function obsCenter() {
+    let sx=0, sy=0, n=0;
+    for (let y=0; y<ydim; y++) for (let x=0; x<xdim; x++) {
+      if (bar[y*xdim+x]) { sx+=x; sy+=y; n++; }
+    }
+    return n>0 ? {x: sx/n, y: sy/n} : {x: xdim/2, y: ydim/2};
+  }
+
+  // Move all obstacle cells by dx, dy
+  function moveObstacle(dx, dy) {
+    const oldBar = new Uint8Array(bar);
+    bar.fill(0);
+    for (let y=0; y<ydim; y++) for (let x=0; x<xdim; x++) {
+      if (oldBar[y*xdim+x]) {
+        const nx = x+dx, ny = y+dy;
+        if (nx>1 && nx<xdim-2 && ny>1 && ny<ydim-2) {
+          bar[ny*xdim+nx] = 1;
+        }
+      }
+    }
+    // Re-equilibrate newly exposed fluid cells
+    for (let i=0; i<xdim*ydim; i++) {
+      if (oldBar[i] && !bar[i]) setEq(i, u0, 0, 1);
+    }
+  }
+
+  canvas.addEventListener('pointerdown', e => {
+    const g = gxy(e.clientX, e.clientY);
+    e.preventDefault();
+
+    if (drawMode === 'move') {
+      // Check if clicking near obstacle
+      if (nearObstacle(g.x, g.y, Math.max(5, (ydim/20)|0))) {
+        draggingObstacle = true;
+        dragStartX = g.x;
+        dragStartY = g.y;
+        const c = obsCenter();
+        obsCenterX = c.x;
+        obsCenterY = c.y;
+        canvas.style.cursor = 'grabbing';
+        // Dismiss tooltip
+        const tip = document.getElementById('drag-tooltip');
+        if (tip) tip.style.display = 'none';
+      }
+    } else {
+      drawing = true;
+      paint(g.x, g.y);
+    }
+  });
+
+  canvas.addEventListener('pointermove', e => {
+    const g = gxy(e.clientX, e.clientY);
+    e.preventDefault();
+
+    if (drawMode === 'move') {
+      if (draggingObstacle) {
+        const dx = g.x - dragStartX;
+        const dy = g.y - dragStartY;
+        if (Math.abs(dx) >= 1 || Math.abs(dy) >= 1) {
+          moveObstacle(Math.round(dx), Math.round(dy));
+          dragStartX = g.x;
+          dragStartY = g.y;
+        }
+      } else {
+        // Show grab cursor when hovering near obstacle
+        canvas.style.cursor = nearObstacle(g.x, g.y, Math.max(5, (ydim/20)|0)) ? 'grab' : 'crosshair';
+      }
+    } else if (drawing) {
+      paint(g.x, g.y);
+    }
+  });
+
+  canvas.addEventListener('pointerup', () => { drawing = false; draggingObstacle = false; canvas.style.cursor = drawMode === 'move' ? 'default' : 'crosshair'; });
+  canvas.addEventListener('pointerleave', () => { drawing = false; draggingObstacle = false; });
   canvas.addEventListener('touchstart', e=>e.preventDefault(), {passive:false});
 
   /* ── UI ────────────────────────────────────────────────── */
@@ -521,11 +620,19 @@
   document.querySelectorAll('.draw-btn').forEach(b=>b.addEventListener('click',()=>{
     document.querySelectorAll('.draw-btn').forEach(x=>x.classList.remove('active'));
     b.classList.add('active'); drawMode=b.dataset.draw;
+    canvas.style.cursor = drawMode === 'move' ? 'default' : 'crosshair';
   }));
   document.getElementById('pause-btn').addEventListener('click',()=>{ paused=!paused; document.getElementById('pause-btn').textContent=paused?'Play':'Pause'; });
   document.getElementById('reset-btn').addEventListener('click',()=>{ placePreset(currentPreset); initFlow(); if(vizMode==='streamlines')initParticles(); });
   document.getElementById('screenshot-btn').addEventListener('click',()=>{ const a=document.createElement('a'); a.download=`wind-tunnel-Re${reynolds}-${vizMode}.png`; a.href=canvas.toDataURL('image/png'); a.click(); });
-  document.querySelectorAll('.panel-header').forEach(h=>h.addEventListener('click',()=>{ const id=h.dataset.toggle; if(!id)return; document.getElementById(id).classList.toggle('collapsed'); h.classList.toggle('collapsed'); }));
+  document.querySelectorAll('.panel-header').forEach(h=>h.addEventListener('click',()=>{
+    const id=h.dataset.toggle; if(!id)return;
+    const body = document.getElementById(id);
+    body.classList.toggle('collapsed');
+    body.classList.remove('mobile-collapse');
+    h.classList.toggle('collapsed');
+    h.classList.remove('mobile-collapse');
+  }));
   function handleMobile() { if(window.innerWidth<=900) document.querySelectorAll('.panel-body').forEach(b=>{ b.classList.add('mobile-collapse','collapsed'); b.previousElementSibling?.classList.add('mobile-collapse','collapsed'); }); }
   window.addEventListener('resize', handleMobile);
 
@@ -568,5 +675,11 @@
     }
   }
   warmupLoop();
+
+  // Auto-dismiss drag tooltip after 4 seconds
+  setTimeout(() => {
+    const tip = document.getElementById('drag-tooltip');
+    if (tip) { tip.style.opacity = '0'; setTimeout(() => tip.style.display = 'none', 500); }
+  }, 4000);
 
 })();
