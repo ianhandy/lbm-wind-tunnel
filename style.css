@@ -6,14 +6,14 @@
 }
 
 :root {
-  --bg: #0d1117;
-  --bg-panel: #161b22;
-  --bg-panel-hover: #1c2128;
-  --border: #30363d;
-  --text: #e6edf3;
-  --text-dim: #8b949e;
-  --accent: #58a6ff;
-  --accent-dim: #1f6feb;
+  --bg: #18181a;
+  --bg-panel: #1e1e20;
+  --bg-panel-hover: #252527;
+  --border: rgba(212,203,184,0.08);
+  --text: #d4cbb8;
+  --text-dim: #8a8478;
+  --accent: #d4cbb8;
+  --accent-dim: #5a5650;
   --red: #f85149;
   --green: #3fb950;
   --orange: #d29922;
@@ -169,9 +169,9 @@ input[type="range"]::-webkit-slider-thumb {
   padding: 6px 8px;
   font-size: 11px;
   font-weight: 500;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(212,203,184,0.08);
   border-radius: var(--radius);
-  background: var(--bg);
+  background: rgba(212,203,184,0.06);
   color: var(--text-dim);
   cursor: pointer;
   transition: all 0.15s;
@@ -183,9 +183,9 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 .preset-btn.active, .viz-btn.active, .draw-btn.active {
-  border-color: var(--accent);
+  border-color: rgba(212,203,184,0.15);
   color: var(--accent);
-  background: rgba(88, 166, 255, 0.08);
+  background: rgba(212,203,184,0.14);
 }
 
 .buttons-row {
@@ -200,9 +200,9 @@ input[type="range"]::-webkit-slider-thumb {
   padding: 7px 10px;
   font-size: 11px;
   font-weight: 500;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(212,203,184,0.08);
   border-radius: var(--radius);
-  background: var(--bg);
+  background: rgba(212,203,184,0.06);
   color: var(--text);
   cursor: pointer;
   transition: all 0.15s;
@@ -241,7 +241,7 @@ input[type="range"]::-webkit-slider-thumb {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(22, 27, 34, 0.9);
+  background: rgba(30, 30, 32, 0.9);
   border: 1px solid var(--border);
   color: var(--text-dim);
   padding: 8px 16px;
