@@ -370,7 +370,7 @@
     const c = curlRGB(t);
     curlLUT[i] = 0xFF000000 | (c[2]<<16) | (c[1]<<8) | c[0];
   }
-  const OBS_ABGR = 0xFF463C3C; // rgb(60,60,70)
+  const OBS_ABGR = 0xFF20201E; // rgb(30,32,32) — matches --bg-panel
 
   /* ── Render ────────────────────────────────────────────── */
   function render() {
@@ -413,7 +413,7 @@
     for (let i = 0; i < NPART; i++) parts.push(spawnP());
     if (!trailCv) { trailCv = document.createElement('canvas'); trailCx = trailCv.getContext('2d'); }
     trailCv.width = xdim; trailCv.height = ydim;
-    trailCx.fillStyle = '#0d1117'; trailCx.fillRect(0,0,xdim,ydim);
+    trailCx.fillStyle = '#18181a'; trailCx.fillRect(0,0,xdim,ydim);
   }
   function spawnP() { return {x:Math.random()*xdim*0.02, y:Math.random()*ydim, age:Math.random()*100|0, max:600+(Math.random()*400|0)}; }
 
@@ -426,7 +426,7 @@
       if (bar[idx]) { parts[i]=spawnP(); continue; }
       p.x += ux[idx]*3.0; p.y += uy[idx]*3.0; p.age++;
     }
-    trailCx.fillStyle = 'rgba(13,17,23,0.035)';
+    trailCx.fillStyle = 'rgba(24,24,26,0.035)';
     trailCx.fillRect(0,0,xdim,ydim);
     const inv = mxS>1e-6 ? 1/mxS : 1;
     for (const p of parts) {
@@ -439,7 +439,7 @@
     }
     // Obstacles on top
     const td = trailCx.getImageData(0,0,xdim,ydim), tp = td.data;
-    for (let i = 0; i < xdim*ydim; i++) if (bar[i]) { const p=i*4; tp[p]=60;tp[p+1]=60;tp[p+2]=70;tp[p+3]=255; }
+    for (let i = 0; i < xdim*ydim; i++) if (bar[i]) { const p=i*4; tp[p]=30;tp[p+1]=32;tp[p+2]=32;tp[p+3]=255; }
     trailCx.putImageData(td,0,0);
     ctx.drawImage(trailCv,0,0);
   }
